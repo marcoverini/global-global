@@ -1,0 +1,36 @@
+name: Monthly Air Data Update
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"  # runs on the 1st day of every month at midnight UTC
+  workflow_dispatch:      # allows manual trigger from the Actions tab
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas
+
+      - name: Run update script
+        run: |
+          python scripts/update_air_routes.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add data/air_routes.csv
+          git commit -m "Monthly air data update"
+          git push
+        continue-on-error: true
