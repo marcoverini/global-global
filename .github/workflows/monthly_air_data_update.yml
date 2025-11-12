@@ -22,7 +22,7 @@ jobs:
         run: |
           pip install requests pandas
 
-      - name: Run update script
+      - name: python air/update_air_data.py
         run: |
           python scripts/update_air_routes.py
 
