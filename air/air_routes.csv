@@ -1,1 +1,1 @@
-
+origin_city,origin_country,origin_lat,origin_lon,destination_city,destination_country,destination_lat,destination_lon,origin_airport_name,origin_airport_iata,destination_airport_name,destination_airport_iata,airline_name,airline_iata,flight_duration_min,distance_km,frequency_per_day,last_updated
