@@ -2,35 +2,43 @@ name: Monthly Air Data Update
 
 on:
   schedule:
-    - cron: "0 0 1 * *"  # runs on the 1st day of every month at midnight UTC
-  workflow_dispatch:      # allows manual trigger from the Actions tab
+    - cron: "0 0 1 * *"  # runs at 00:00 UTC on the 1st of every month
+  workflow_dispatch:      # allows manual trigger
 
 jobs:
-  update-data:
+  update-air-data:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      # Step 1: Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up Python
+      # Step 2: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      # Step 3: Install dependencies
+      - name: Install Python dependencies
         run: |
-          pip install requests pandas
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: python air/update_air_data.py
-        run: |
-          python scripts/update_air_routes.py
+      # Step 4: Run the air routes update script
+      - name: Run air routes update script
+        run: python air/update_air_data.py
+        env:
+          GEONAMES_USERNAME: ${{ secrets.GEONAMES_USERNAME }}
+          AVIATIONSTACK_KEY: ${{ secrets.AVIATIONSTACK_KEY }}
 
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
-          git add data/air_routes.csv
-          git commit -m "Monthly air data update"
-          git push
-        continue-on-error: true
+      # Step 5: Commit and push updated CSV
+      - name: Commit updated CSV
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Automated update: air_routes.csv on $(date -u +'%Y-%m-%d')"
+          file_pattern: "air/air_routes.csv"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
